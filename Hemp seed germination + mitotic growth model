@@ -1,0 +1,42 @@
+# Hemp seed germination + mitotic growth model
+
+# Environment parameters
+nitrate_conc      = 5.0   # mmol/L
+salt_conc         = 10.0  # mmol/L (NaCl equivalent)
+temperature       = 22.0  # °C
+water_activity    = 0.98  # dimensionless, 0–1
+
+# Seed parameters
+initial_viability = 0.95  # probability seed is alive
+base_germ_rate    = 0.80  # baseline germination probability in ideal conditions
+mitosis_rate_max  = 1.0   # arbitrary units of cell division per day
+
+def stress_factor(nitrate, salt):
+    # Mild nitrate boosts, excess salt suppresses
+    nitrate_boost = 1.0 + 0.05 * min(nitrate, 10.0)
+    salt_penalty  = 1.0 - 0.03 * max(salt - 5.0, 0.0)
+    return max(0.0, nitrate_boost * salt_penalty)
+
+def temp_factor(T):
+    # Optimal around 24 °C, Gaussian-like penalty
+    T_opt = 24.0
+    return max(0.0, 1.0 - ((T - T_opt) ** 2) / 100.0)
+
+def water_factor(a_w):
+    # Needs high water activity
+    return max(0.0, (a_w - 0.90) / 0.10)
+
+def germination_probability():
+    env = stress_factor(nitrate_conc, salt_conc) * temp_factor(temperature) * water_factor(water_activity)
+    return initial_viability * base_germ_rate * env
+
+def mitosis_rate():
+    # Mitotic growth rate after germination
+    env = stress_factor(nitrate_conc, salt_conc) * temp_factor(temperature) * water_factor(water_activity)
+    return mitosis_rate_max * env
+
+P_germ = germination_probability()
+R_mitosis = mitosis_rate()
+
+print("Germination probability:", round(P_germ, 3))
+print("Mitotic growth rate:", round(R_mitosis, 3), "units/day")
