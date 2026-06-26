@@ -1,0 +1,184 @@
+PRESSURE CHEM – SYMBOLIC FORMULAS (TEXTBOOK STYLE)
+
+1. Environment and deviations
+
+Let the environment be:
+  E = (N, S, T, a_w)
+
+where:
+  N   = nitrate concentration
+  S   = salt concentration
+  T   = temperature
+  a_w = water activity
+
+Baselines:
+  N₀, S₀, T₀, a_w₀
+
+Deviation operator:
+  dev(x; x₀) = (x − x₀) / x₀
+
+So:
+  d_N  = dev(N;  N₀)  = (N  − N₀)  / N₀
+  d_S  = dev(S;  S₀)  = (S  − S₀)  / S₀
+  d_T  = dev(T;  T₀)  = (T  − T₀)  / T₀
+  d_aw = dev(a_w; a_w₀) = (a_w − a_w₀) / a_w₀
+
+
+2. Core Pressure Chem operator Ω(E)
+
+Coefficients:
+  α_N, α_S, β_S, β_T, α_w
+  Ω_max = maximum allowed Ω
+
+Raw operator:
+  Ω_raw(E) =
+      1
+    + α_N · d_N
+    + α_S · d_S
+    − β_S · max(0, d_S)
+    − β_T · (d_T)²
+    + α_w · d_aw
+
+Clamped operator:
+  Ω(E) = min( Ω_max , max(0, Ω_raw(E)) )
+
+
+3. Germination probability P_germ(E)
+
+Baseline germination:
+  P_germ⁰
+
+Pressure‑Chem germination:
+  P_germ(E) = P_germ⁰ · Ω(E)
+
+
+4. Mitosis rate R_mitosis(E)
+
+Baseline mitosis:
+  R_mitosis⁰
+
+Pressure‑Chem mitosis:
+  R_mitosis(E) = R_mitosis⁰ · Ω(E)
+
+
+5. Root–shoot partition π_root(t, E)
+
+Time‑dependent base partition:
+  π_min  = minimum root fraction
+  π_max  = maximum root fraction
+  γ      = time‑decay constant
+
+Base curve:
+  π_base(t) = π_min + (π_max − π_min) · exp( −γ · t )
+
+Optionally environment‑dependent stress term:
+  Δπ_stress(E) = k_S · max(0, d_S) − k_N · max(0, d_N)
+
+Full partition:
+  π_root(t, E) = clip( π_base(t) + Δπ_stress(E) , 0 , 1 )
+
+Shoot fraction:
+  π_shoot(t, E) = 1 − π_root(t, E)
+
+
+6. Growth quanta and allocation
+
+Total growth quanta per unit time:
+  G(t, E) = R_mitosis(E)
+
+Allocated to root and shoot:
+  G_root(t, E)  = π_root(t, E)  · G(t, E)
+  G_shoot(t, E) = π_shoot(t, E) · G(t, E)
+
+
+7. Taproot length L(t)
+
+Parameters:
+  L_max = maximum taproot length
+  k_L   = length gain per root growth unit
+
+Update:
+  ΔL(t, E) = k_L · G_root(t, E) · (1 − L(t) / L_max)
+
+  L(t + Δt) = L(t) + ΔL(t, E)
+
+
+8. Biomass B_root(t), B_shoot(t), B_total(t)
+
+Parameters:
+  k_B_root  = biomass gain per root growth unit
+  k_B_shoot = biomass gain per shoot growth unit
+
+Root biomass:
+  ΔB_root(t, E) = k_B_root · G_root(t, E)
+  B_root(t + Δt) = B_root(t) + ΔB_root(t, E)
+
+Shoot biomass:
+  ΔB_shoot(t, E) = k_B_shoot · G_shoot(t, E)
+  B_shoot(t + Δt) = B_shoot(t) + ΔB_shoot(t, E)
+
+Total biomass:
+  B_total(t) = B_root(t) + B_shoot(t)
+
+
+9. Stall and reactivation thresholds
+
+Thresholds:
+  R_stop    = stall threshold
+  R_restart = reactivation threshold (R_restart > R_stop)
+
+Stall condition:
+  if R_mitosis(E) < R_stop  ⇒ growth is stalled
+
+Reactivation condition:
+  if growth is stalled and R_mitosis(E) ≥ R_restart ⇒ growth resumes
+
+
+10. Extended modular operators (dirt, microbes, coffee, salt cycles)
+
+Dirt chemistry operator:
+  Ω_dirt(D) =
+      k_dirt,org · D_org
+    − k_dirt,comp · D_comp
+    − k_dirt,pH · | D_pH − pH_opt |
+
+Microbial pressure operator:
+  Ω_micro(M) = − k_micro · M_pressure
+
+Coffee‑compound stress operator:
+  Ω_coffee(C) = − k_coffee · C_dose
+
+Salt‑cycle heat/cool operator:
+  Ω_cycle(X) = − k_cycle · X_amplitude
+
+Total modular operator:
+  Ω_tot(E, D, M, C, X) =
+      Ω_base(E)
+    + Ω_dirt(D)
+    + Ω_micro(M)
+    + Ω_coffee(C)
+    + Ω_cycle(X)
+
+Clamped:
+  Ω_tot_clamped = min( Ω_max , max(0, Ω_tot(E, D, M, C, X)) )
+
+Mitosis with modular pressure:
+  R_mitosis_mod(E, D, M, C, X) = R_mitosis⁰ · Ω_tot_clamped
+
+
+11. Bonsai minimization objective (optional)
+
+Final‑time taproot and biomass:
+  L(T_end), B_total(T_end)
+
+Weights:
+  w_L, w_B
+
+Objective:
+  J(E, D, M, C, X) =
+      w_L · L(T_end)
+    + w_B · B_total(T_end)
+
+Bonsai regime:
+  find (E, D, M, C, X) that minimize J
+  subject to P_germ(E) ≥ P_min and plant survival constraints
