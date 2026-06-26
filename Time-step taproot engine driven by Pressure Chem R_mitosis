@@ -1,0 +1,30 @@
+# Time-step taproot engine driven by Pressure Chem R_mitosis
+
+days       = 10          # simulate 10 days
+L_max      = 5.0         # cm, saturation length
+k_L        = 0.2         # cm per mitosis unit per day
+
+# Initial conditions
+L = 0.1                  # initial taproot length (cm)
+
+def omega(E):
+    # Same Omega(E) from earlier Pressure Chem operator
+    N, S, T, aw = E
+    # ... your deviation + clamp logic here ...
+    return 1.0  # placeholder; replace with real Omega(E)
+
+def R_mitosis(E):
+    R0 = 1.0    # baseline mitosis rate
+    return R0 * omega(E)
+
+# Example: constant environment for now
+E_const = (5.0, 10.0, 22.0, 0.97)
+
+for t in range(days):
+    R = R_mitosis(E_const)
+
+    # Logistic-like growth toward L_max
+    growth = k_L * R * (1.0 - L / L_max)
+    L = L + growth
+
+    print(f"Day {t+1}: R_mitosis={R:.3f}, taproot L={L:.3f} cm")
