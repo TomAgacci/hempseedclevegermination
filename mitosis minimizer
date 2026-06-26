@@ -1,0 +1,19 @@
+def omega(E):
+    N, S, T, aw = E
+    dN  = (N  - 5.0) / 5.0
+    dS  = (S  - 5.0) / 5.0
+    dT  = (T  - 24.0) / 24.0
+    daw = (aw - 0.98) / 0.98
+
+    val = (
+        1.0
+        + 0.10*dN
+        + 0.02*dS
+        - 0.08*max(0, dS)
+        - 0.50*(dT**2)
+        + 0.50*daw
+    )
+    return max(0.0, min(1.5, val))
+
+def R_mitosis(E):
+    return 1.0 * omega(E)
