@@ -1,0 +1,60 @@
+# Pressure Chem-style germination + mitosis engine
+
+from math import pow
+
+# Baseline environment (ideal)
+N0   = 5.0    # mmol/L nitrate
+S0   = 5.0    # mmol/L salt
+T0   = 24.0   # °C
+aw0  = 0.98   # water activity
+
+# Current environment
+N    = 5.0
+S    = 10.0
+T    = 22.0
+aw   = 0.97
+
+# Coefficients (Pressure Chem tuning)
+alpha_N = 0.10
+alpha_S = 0.02
+beta_S  = 0.08
+beta_T  = 0.50
+alpha_w = 0.50
+OMEGA_MAX = 1.5
+
+# Baseline biological parameters
+P_germ0     = 0.80   # baseline germination probability
+R_mitosis0  = 1.00   # baseline mitotic rate (units/day)
+
+def deviation(x, x0):
+    return (x - x0) / x0
+
+def omega(E):
+    N, S, T, aw = E
+    dN  = deviation(N,  N0)
+    dS  = deviation(S,  S0)
+    dT  = deviation(T,  T0)
+    daw = deviation(aw, aw0)
+
+    # Core Pressure Chem deviation operator
+    val = (
+        1.0
+        + alpha_N * dN
+        + alpha_S * dS
+        - beta_S  * max(0.0, dS)      # toxicity beyond baseline salt
+        - beta_T  * pow(dT, 2)        # quadratic temp penalty
+        + alpha_w * daw
+    )
+
+    # Clamp
+    return max(0.0, min(OMEGA_MAX, val))
+
+E = (N, S, T, aw)
+Omega = omega(E)
+
+P_germ    = P_germ0    * Omega
+R_mitosis = R_mitosis0 * Omega
+
+print("Omega(E) =", round(Omega, 3))
+print("P_germ   =", round(P_germ, 3))
+print("R_mitosis=", round(R_mitosis, 3), "units/day")
