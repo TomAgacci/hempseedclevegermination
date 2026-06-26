@@ -1,0 +1,207 @@
+PRESSURE‑CHEM – ATOMIC / MOLECULAR CONVERSION LAYER
+(Textbook‑style symbolic math, no executable code)
+
+0. Atomic structure and notation
+
+For each element i:
+
+  Zᵢ  = atomic number of element i
+        (number of protons)
+
+  Aᵢ  = mass number of element i
+        (protons + neutrons)
+
+  m_p = mass of a proton
+  m_n = mass of a neutron
+  m_e = mass of an electron
+
+Approximate atomic mass of element i:
+
+  m_atomᵢ ≈ Zᵢ · m_p + (Aᵢ − Zᵢ) · m_n + Zᵢ · m_e
+
+For a neutral atom:
+
+  n_pᵢ = Zᵢ       (protons)
+  n_eᵢ = Zᵢ       (electrons)
+  n_nᵢ = Aᵢ − Zᵢ (neutrons)
+
+
+1. Elemental concentration → atomic / proton / electron counts
+
+Let:
+
+  cᵢ = concentration of element i (mol per unit volume)
+  N_A = Avogadro’s number
+
+Number of atoms of element i per unit volume:
+
+  n_atomsᵢ = cᵢ · N_A
+
+Total protons per unit volume from element i:
+
+  n_p,totalᵢ = n_atomsᵢ · Zᵢ
+
+Total electrons per unit volume from element i (neutral case):
+
+  n_e,totalᵢ = n_atomsᵢ · Zᵢ
+
+Total mass per unit volume from element i:
+
+  ρᵢ = n_atomsᵢ · m_atomᵢ
+
+
+2. Molecular composition and transfer
+
+Consider a molecule M composed of elements i with stoichiometric coefficients νᵢ:
+
+  M = Σᵢ νᵢ · (element i)
+
+Example:
+  H₂O: ν_H = 2, ν_O = 1
+
+Molecular mass:
+
+  m_M = Σᵢ νᵢ · m_atomᵢ
+
+Molecular protons:
+
+  n_p,M = Σᵢ νᵢ · Zᵢ
+
+Molecular electrons (neutral):
+
+  n_e,M = Σᵢ νᵢ · Zᵢ
+
+
+3. Free‑space fraction and energy density
+
+We idealize matter as occupying a small fraction of volume, with the rest being “free space”.
+
+Let:
+
+  f_matter = fraction of volume occupied by atomic/molecular cores
+  f_space  = 1 − f_matter
+
+Total mass density (all elements and molecules):
+
+  ρ_total = Σᵢ ρᵢ
+
+Define an energy density associated with molecular transfer:
+
+  ε_transfer = k_ε · ρ_total · f_space
+
+where:
+  k_ε = proportionality constant linking mass density and free‑space fraction
+        to an effective energy density for molecular transfer.
+
+
+4. Proton–electron conversion metric (abstract coupling)
+
+We do not convert protons into electrons physically, but we can define a
+mathematical coupling metric that measures how proton and electron populations
+co‑vary under Pressure‑Chem deviations.
+
+Define:
+
+  P_total = Σᵢ n_p,totalᵢ   (total protons per unit volume)
+  E_total = Σᵢ n_e,totalᵢ   (total electrons per unit volume)
+
+Baseline values:
+
+  P_total⁰, E_total⁰
+
+Deviations:
+
+  dev_P = (P_total − P_total⁰) / P_total⁰
+  dev_E = (E_total − E_total⁰) / E_total⁰
+
+Define a coupling metric:
+
+  χ_PE = α_PE · dev_P + β_PE · dev_E
+
+where:
+  α_PE, β_PE are coefficients describing how proton and electron deviations
+  jointly contribute to an abstract “charge‑structure pressure”.
+
+
+5. Energy‑mass deviation operator for molecular transfer
+
+We link the atomic/molecular mass and the free‑space fraction to an
+energy‑deviation operator that can be used inside Pressure‑Chem.
+
+Baseline energy density:
+
+  ε_transfer⁰
+
+Deviation:
+
+  dev_ε = (ε_transfer − ε_transfer⁰) / ε_transfer⁰
+
+Define an energy‑mass operator:
+
+  Ω_energy = γ_ε · dev_ε
+
+where:
+  γ_ε is a tuning coefficient for how strongly energy‑mass deviation affects
+  growth or stress.
+
+
+6. Integration with Pressure‑Chem elemental operator
+
+Recall the elemental Pressure‑Chem operator:
+
+  Ω_tot,raw =
+      1
+    + Σᵢ Ωᵢ,raw
+    + Ω_aw,raw
+    + Ω_T,raw
+
+We now add atomic/molecular terms:
+
+  Ω_PE,raw     = δ_PE · χ_PE
+  Ω_energy,raw = Ω_energy
+
+Extended raw operator:
+
+  Ω_ext,raw =
+      1
+    + Σᵢ Ωᵢ,raw
+    + Ω_aw,raw
+    + Ω_T,raw
+    + Ω_PE,raw
+    + Ω_energy,raw
+
+Clamped:
+
+  Ω_ext = min( Ω_max , max(0, Ω_ext,raw) )
+
+
+7. Germination and mitosis with atomic/molecular layer
+
+Germination:
+
+  P_germ(E) = P_germ⁰ · Ω_ext
+
+Mitosis:
+
+  R_mitosis(E) = R_mitosis⁰ · Ω_ext
+
+
+8. Conceptual interpretation (textbook note)
+
+• The **proton/electron layer** (χ_PE) does not represent physical conversion
+  of protons into electrons; it is a **coupling metric** that tracks how
+  changes in elemental composition alter charge structure and, by extension,
+  biological pressure.
+
+• The **energy‑mass deviation operator** (Ω_energy) uses the idea that matter
+  occupies a small fraction of space (f_matter) and the rest is “free space”
+  (f_space), and treats changes in mass density and free‑space fraction as
+  contributors to an effective energy density for molecular transfer.
+
+• Together, χ_PE and Ω_energy extend Pressure‑Chem from **bulk chemistry**
+  (concentrations, salts, water activity) into a **symbolic atomic/molecular
+  layer** that can be used for advanced modeling, while remaining abstract and
+  non‑destructive.
+
+This completes the textbook‑style atomic/molecular conversion layer for
+Pressure‑Chem.
