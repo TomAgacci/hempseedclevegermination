@@ -1,0 +1,492 @@
+HEMP SEED GERMINATION + NITRATE/GA3 COMPARISON
+===============================================
+
+PURPOSE
+-------
+Use separate treatments to determine whether an older seed lot responds
+better to ordinary hydration, a nitrate germination signal, or gibberellic
+acid (GA3).
+
+IMPORTANT
+---------
+These are experimental screening concentrations, not guaranteed hemp-specific
+optima. Old seeds may fail because the embryo is no longer viable. Neither
+nitrate nor GA3 can restore a dead embryo.
+
+Do not initially combine GA3 + nitrate. Separate treatments make it possible
+to determine which treatment, if any, improves germination.
+
+
+===============================================================
+A. CONTROL
+===============================================================
+
+Treatment:
+    Clean water only
+
+Purpose:
+    Establish the untreated germination baseline.
+
+Example:
+    10-25 seeds
+
+Soak:
+    Approximately 8-12 hours
+
+Then:
+    Transfer to a moist, aerated germination medium.
+
+Avoid:
+    Completely waterlogged conditions.
+
+Record:
+    - number germinated
+    - time to radicle emergence
+    - abnormal seedlings
+    - mold/decay
+    - normal established seedlings
+
+
+===============================================================
+B. POTASSIUM NITRATE (KNO3) COMPARISON
+===============================================================
+
+Experimental comparison series:
+
+    CONTROL      = 0 g/L
+    VERY LOW     = 0.5 g/L KNO3  = 0.05%
+    LOW          = 1.0 g/L KNO3  = 0.10%
+    MODERATE     = 2.0 g/L KNO3  = 0.20%
+
+Example preparation:
+
+                 100 mL     500 mL     1 L
+    -------------------------------------------------
+    0.05% KNO3   0.05 g     0.25 g      0.50 g
+    0.10% KNO3   0.10 g     0.50 g      1.00 g
+    0.20% KNO3   0.20 g     1.00 g      2.00 g
+
+
+Suggested screening design:
+
+    Group A = water control
+    Group B = 0.05% KNO3
+    Group C = 0.10% KNO3
+    Group D = 0.20% KNO3
+
+Use the same:
+    - seed lot
+    - seed count
+    - temperature
+    - germination medium
+    - moisture
+    - observation schedule
+
+Do NOT assume:
+
+    more nitrate = more germination
+
+A better conceptual response is:
+
+                    optimal region
+                         /\
+                        /  \
+                       /    \
+                      /      \
+    germination _____/        \_____ stress/inhibition
+                 low nitrate          excessive nitrate
+
+
+===============================================================
+C. GIBBERELLIC ACID (GA3) COMPARISON
+===============================================================
+
+Experimental screening concentrations:
+
+    CONTROL   =   0 ppm
+    LOW       =  25 ppm
+    LOW-MOD   =  50 ppm
+    MODERATE  = 100 ppm
+    HIGH TEST = 200 ppm
+
+Example quantities of PURE GA3:
+
+                    100 mL     500 mL     1 L
+    ------------------------------------------------
+     25 ppm          2.5 mg     12.5 mg      25 mg
+     50 ppm          5.0 mg     25.0 mg      50 mg
+    100 ppm         10.0 mg     50.0 mg     100 mg
+    200 ppm         20.0 mg    100.0 mg     200 mg
+
+
+CAUTION:
+
+Commercial GA3 products may NOT be 100% active ingredient.
+
+Therefore:
+
+required product mass =
+    desired GA3 mass / active-ingredient fraction
+
+
+Example:
+
+If a product contained 20% active GA3:
+
+active_fraction = 0.20
+
+To obtain 50 mg active GA3:
+
+product_mass =
+    50 mg / 0.20
+    =
+    250 mg product
+
+Follow the manufacturer's mixing directions because GA3 formulations differ.
+
+
+===============================================================
+D. OLD-SEED SCREENING EXPERIMENT
+===============================================================
+
+Preferably use at least:
+
+    10-25 seeds per treatment
+
+Example experimental groups:
+
+    GROUP 1:
+        Water control
+
+    GROUP 2:
+        0.10% KNO3
+
+    GROUP 3:
+        0.20% KNO3
+
+    GROUP 4:
+        50 ppm GA3
+
+    GROUP 5:
+        100 ppm GA3
+
+
+Keep every other condition identical.
+
+
+Suggested observations:
+
+DAY / TIME
+    |
+    +--> seed hydrated?
+    |
+    +--> seed coat opened?
+    |
+    +--> radicle emerged?
+    |
+    +--> normal root development?
+    |
+    +--> normal shoot development?
+    |
+    +--> decay/mold?
+    |
+    +--> normal established seedling?
+
+
+===============================================================
+E. DO NOT COUNT "SPLITTING" ALONE AS SUCCESS
+===============================================================
+
+Use:
+
+SEED
+  |
+  v
+HYDRATION
+  |
+  v
+GERMINATION ACTIVATION
+  |
+  v
+COAT SPLITTING
+  |
+  v
+RADICLE EMERGENCE
+  |
+  v
+ROOT + SHOOT DEVELOPMENT
+  |
+  v
+NORMAL SEEDLING
+
+
+A seed that cracks open but subsequently dies should NOT be counted
+as a successful normal germination.
+
+
+Recommended primary measurement:
+
+normal_germination_percent =
+    100 * normal_seedlings / total_seeds
+
+
+Example:
+
+20 seeds tested
+14 coat splits
+12 radicles
+10 normal seedlings
+
+coat_split_percent =
+    14/20 * 100
+    =
+    70%
+
+radicle_percent =
+    12/20 * 100
+    =
+    60%
+
+normal_germination_percent =
+    10/20 * 100
+    =
+    50%
+
+
+===============================================================
+F. ZERO-CIRCLE / SLOPE COMPARISON
+===============================================================
+
+                 KNO3                GA3
+--------------------------------------------------------------
+ZERO             water only          water only
+
+VERY LOW         0.05%               25 ppm
+
+LOW              0.10%               50 ppm
+
+MODERATE          0.20%              100 ppm
+
+HIGH TEST         >0.20%              200 ppm
+                  increasingly        increased risk of
+                  investigate         unwanted elongation/
+                  salt effects        abnormal development
+
+
+Interpretation:
+
+ZERO
+ |
+ | increasing treatment
+ v
+LOW
+ |
+ v
+MODERATE
+ |
+ | diminishing benefit
+ v
+EXCESS
+ |
+ v
+STRESS / ABNORMAL RESPONSE
+
+
+The experimentally useful question is NOT:
+
+    "What concentration causes maximum splitting?"
+
+Instead test:
+
+    "Which treatment produces the greatest percentage
+     of NORMAL established seedlings?"
+
+
+===============================================================
+G. PRESSURE-CHEM MODEL
+===============================================================
+
+Represent nitrate with an optimum-limited response:
+
+f_N =
+    exp(
+        -((N - N_opt) / width_N)^2
+    )
+
+
+Rather than:
+
+f_N =
+    1 + alpha_N * nitrate
+
+
+because the second equation incorrectly assumes continually increasing
+benefit from increasing nitrate.
+
+
+Combined environmental score:
+
+Omega =
+    f_nitrate
+    * f_salt
+    * f_temperature
+    * f_water
+
+
+Bound:
+
+0 <= Omega <= 1
+
+
+Then:
+
+P_germination =
+    viability * Omega
+
+
+P_coat_split =
+    P_germination * P_split_given_germination
+
+
+P_radicle =
+    P_coat_split * P_radicle_given_split
+
+
+P_normal_seedling =
+    P_radicle * P_normal_establishment
+
+
+Always clamp probabilities:
+
+0 <= P <= 1
+
+
+===============================================================
+H. PYTHON REPRESENTATION
+===============================================================
+
+from math import exp
+
+
+def clamp01(x):
+    return max(0.0, min(1.0, x))
+
+
+def nitrate_response(N, optimum=5.0, width=5.0):
+    # Simulation parameters, NOT validated dosing values.
+    return exp(-((N - optimum) / width) ** 2)
+
+
+def germination_engine(
+    viability,
+    nitrate_score,
+    salt_score,
+    temperature_score,
+    water_score
+):
+
+    environment = clamp01(
+        nitrate_score
+        * salt_score
+        * temperature_score
+        * water_score
+    )
+
+    p_germ = clamp01(
+        viability * environment
+    )
+
+    p_split = clamp01(
+        p_germ * 0.95
+    )
+
+    p_radicle = clamp01(
+        p_split * 0.92
+    )
+
+    p_normal_seedling = clamp01(
+        p_radicle * 0.90
+    )
+
+    return {
+        "environment": environment,
+        "germination": p_germ,
+        "coat_split": p_split,
+        "radicle": p_radicle,
+        "normal_seedling": p_normal_seedling
+    }
+
+
+===============================================================
+I. IMPORTANT DISTINCTION
+===============================================================
+
+NITRATE
+    ->
+environmental/germination signal
+
+GA3
+    ->
+plant growth/germination hormone signal
+
+WATER
+    ->
+imbibition + metabolic activation
+
+TEMPERATURE
+    ->
+controls metabolic/germination rate
+
+SEED VIABILITY
+    ->
+determines whether a living embryo still exists
+
+
+None of these should be modeled as:
+
+nitrate
+    ->
+male/female/hermaphrodite switch
+
+
+And seed splitting should NOT be modeled as:
+
+one seed
+    ->
+two seeds
+
+
+Instead:
+
+one seed
+    ->
+one developing embryo
+    ->
+one seedling
+
+
+After establishment:
+
+seedling
+    ->
+vegetative modules
+    ->
+branches/meristems
+
+
+Actual new seeds remain downstream of reproduction:
+
+reproductive development
+    ->
+pollination/fertilization
+    ->
+embryo development
+    ->
+seed maturation
+    ->
+new seed
+
+
+===============================================================
+END
+===============================================================
