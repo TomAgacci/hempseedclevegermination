@@ -1,0 +1,1105 @@
+BOUNDED MODULAR-GROWTH MODEL
+============================
+
+Purpose
+-------
+This model represents:
+
+SEED
+  ->
+GERMINATION
+  ->
+SEED-COAT SPLIT
+  ->
+RADICLE EMERGENCE
+  ->
+VEGETATIVE MODULE
+  ->
+REPEATED BOUNDED MODULE PRODUCTION
+  ->
+REPRODUCTIVE DEVELOPMENT
+  ->
+SEED PRODUCTION
+
+Important biological distinction:
+
+"Seed splitting" happens once for each seed during germination.
+
+"Modular splitting" represents repeated vegetative branching,
+meristem growth, or vegetative propagation.
+
+A non-flowering vegetative module does NOT literally produce seeds
+by splitting.
+
+Hermaphroditic/intersex reproductive development is therefore kept
+separate from germination and vegetative module production.
+
+Nitrate is modeled as an environmental growth variable, NOT as a
+switch that determines whether a plant becomes male, female, or
+intersex.
+
+
+============================================================
+1. CORE BOUNDED-GROWTH EQUATION
+============================================================
+
+Let:
+
+M(t) = number of active modules
+r    = intrinsic modular growth coefficient
+K    = carrying capacity
+Omega(t) = environmental multiplier from 0 to 1
+L(t) = module losses
+
+
+The bounded equation is:
+
+M(t+1) =
+    M(t)
+    + r * M(t) * (1 - M(t)/K) * Omega(t)
+    - L(t)
+
+
+Unlike unlimited binary splitting:
+
+1 -> 2 -> 4 -> 8 -> 16 -> 32 -> ...
+
+the carrying-capacity term:
+
+(1 - M/K)
+
+causes growth to slow automatically as the system fills.
+
+
+If:
+
+M << K
+
+then:
+
+(1 - M/K) ~= 1
+
+and expansion is relatively rapid.
+
+
+If:
+
+M ~= K
+
+then:
+
+(1 - M/K) ~= 0
+
+and additional expansion approaches zero.
+
+
+The largest absolute logistic-growth term occurs near:
+
+M = K/2
+
+
+============================================================
+2. PRESSURE-CHEM ENVIRONMENT MODEL
+============================================================
+
+The following Python model uses nitrate, salt, temperature,
+and water activity to generate the environmental multiplier Omega.
+
+The numerical centers are MODEL PARAMETERS ONLY.
+They should not be interpreted as validated hemp dosing instructions.
+
+
+from math import exp
+from dataclasses import dataclass
+
+
+def clamp01(x):
+    return max(0.0, min(1.0, x))
+
+
+# ----------------------------------------------------------
+# ENVIRONMENTAL MODEL PARAMETERS
+# ----------------------------------------------------------
+
+N_OPT = 5.0
+N_WIDTH = 5.0
+
+S_REF = 5.0
+
+T_OPT = 24.0
+T_WIDTH = 7.0
+
+AW_OPT = 0.98
+AW_WIDTH = 0.035
+
+
+def nitrate_response(N):
+    """
+    Mathematical inverted-U nitrate response.
+
+    The purpose of this equation is to prevent nitrate from
+    producing unlimited improvement as N increases.
+    """
+
+    return exp(
+        -((N - N_OPT) / N_WIDTH) ** 2
+    )
+
+
+def salt_response(S):
+    """
+    Increasing salt above the reference level creates
+    an increasing environmental penalty.
+    """
+
+    excess = max(
+        0.0,
+        S - S_REF
+    )
+
+    return exp(
+        -0.06 * excess
+    )
+
+
+def temperature_response(T):
+    """
+    Temperature response centered around T_OPT.
+    """
+
+    return exp(
+        -((T - T_OPT) / T_WIDTH) ** 2
+    )
+
+
+def water_response(aw):
+    """
+    Water-activity response centered around AW_OPT.
+    """
+
+    return exp(
+        -((aw - AW_OPT) / AW_WIDTH) ** 2
+    )
+
+
+def omega(N, S, T, aw):
+    """
+    Combined environmental multiplier.
+
+    Omega is always bounded:
+
+    0 <= Omega <= 1
+    """
+
+    fN = nitrate_response(N)
+    fS = salt_response(S)
+    fT = temperature_response(T)
+    fW = water_response(aw)
+
+    total = (
+        fN
+        * fS
+        * fT
+        * fW
+    )
+
+    return clamp01(total)
+
+
+============================================================
+3. SEED-TO-MODULE ENGINE
+============================================================
+
+This portion handles the one-time transition:
+
+SEED
+  ->
+GERMINATION
+  ->
+COAT_SPLIT
+  ->
+RADICLE
+  ->
+FIRST VEGETATIVE MODULE
+
+
+def seed_to_module(
+    viability,
+    germination_environment,
+    establishment_probability=0.90
+):
+
+    # Step 1:
+    # viable embryo successfully begins germination
+
+    p_germination = clamp01(
+        viability
+        * germination_environment
+    )
+
+
+    # Step 2:
+    # seed coat opens after successful germination begins
+
+    p_seed_split = clamp01(
+        p_germination
+        * 0.95
+    )
+
+
+    # Step 3:
+    # radicle successfully emerges
+
+    p_radicle = clamp01(
+        p_seed_split
+        * 0.92
+    )
+
+
+    # Step 4:
+    # seedling establishes its first renewable
+    # growing module
+
+    p_established_module = clamp01(
+        p_radicle
+        * establishment_probability
+    )
+
+
+    return {
+
+        "germination":
+            p_germination,
+
+        "coat_split":
+            p_seed_split,
+
+        "radicle":
+            p_radicle,
+
+        "module_1":
+            p_established_module
+    }
+
+
+============================================================
+4. MODULAR PLANT POPULATION
+============================================================
+
+Once MODULE_1 exists, the model stops treating the system
+as a germinating seed.
+
+Instead:
+
+MODULE_1
+   |
+   +----------+
+   |          |
+MODULE_2   MODULE_3
+   |          |
+ +---+       +---+
+ |   |       |   |
+M4  M5      M6  M7
+
+
+This represents vegetative/meristematic proliferation.
+
+
+@dataclass
+class ModularPopulation:
+
+    # Number of active modules
+    modules: float = 1.0
+
+    # Maximum supportable population
+    carrying_capacity: float = 100.0
+
+    # Intrinsic modular-growth coefficient
+    growth_rate: float = 0.35
+
+    # Fraction lost per simulation cycle
+    loss_rate: float = 0.02
+
+
+============================================================
+5. ONE MODULAR-GROWTH STEP
+============================================================
+
+
+def modular_step(
+    population,
+    environment
+):
+
+    M = population.modules
+    K = population.carrying_capacity
+    r = population.growth_rate
+
+
+    # ------------------------------------------------------
+    # LOGISTIC MODULAR PRODUCTION
+    # ------------------------------------------------------
+
+    gross_growth = (
+        r
+        * M
+        * (1.0 - M / K)
+        * environment
+    )
+
+
+    # ------------------------------------------------------
+    # MODULE LOSS
+    # ------------------------------------------------------
+
+    losses = (
+        population.loss_rate
+        * M
+    )
+
+
+    # ------------------------------------------------------
+    # NEW POPULATION
+    # ------------------------------------------------------
+
+    new_M = (
+        M
+        + gross_growth
+        - losses
+    )
+
+
+    # Do not allow negative population or growth beyond
+    # the model's carrying capacity.
+
+    new_M = max(
+        0.0,
+        min(K, new_M)
+    )
+
+
+    population.modules = new_M
+
+
+    return {
+
+        "modules":
+            new_M,
+
+        "new_modules":
+            gross_growth,
+
+        "losses":
+            losses,
+
+        "capacity_used":
+            new_M / K
+    }
+
+
+============================================================
+6. COMPLETE SIMULATION EXAMPLE
+============================================================
+
+# Environmental variables
+
+N = 5.0
+S = 10.0
+T = 22.0
+aw = 0.97
+
+
+# Calculate Pressure-Chem environmental state
+
+env = omega(
+    N,
+    S,
+    T,
+    aw
+)
+
+
+print(
+    "Environmental Omega =",
+    round(env, 3)
+)
+
+
+# ----------------------------------------------------------
+# FIRST:
+# SEED -> MODULE
+# ----------------------------------------------------------
+
+seed_result = seed_to_module(
+
+    viability=0.80,
+
+    germination_environment=env,
+
+    establishment_probability=0.90
+)
+
+
+print("\nSEED TRANSITIONS")
+
+for state, probability in seed_result.items():
+
+    print(
+        state,
+        "=",
+        round(probability, 3)
+    )
+
+
+# ----------------------------------------------------------
+# SECOND:
+# ESTABLISHED MODULE -> MODULAR POPULATION
+# ----------------------------------------------------------
+
+plant = ModularPopulation(
+
+    modules=1.0,
+
+    carrying_capacity=100.0,
+
+    growth_rate=0.35,
+
+    loss_rate=0.02
+)
+
+
+print("\nMODULAR GROWTH")
+
+
+for cycle in range(25):
+
+    result = modular_step(
+        plant,
+        env
+    )
+
+
+    print(
+        "Cycle:",
+        cycle,
+
+        "Modules:",
+        round(
+            result["modules"],
+            2
+        ),
+
+        "New:",
+        round(
+            result["new_modules"],
+            2
+        ),
+
+        "Loss:",
+        round(
+            result["losses"],
+            2
+        ),
+
+        "Capacity:",
+        round(
+            100
+            * result["capacity_used"],
+            1
+        ),
+        "%"
+    )
+
+
+============================================================
+7. STATE MACHINE
+============================================================
+
+The complete conceptual system is:
+
+              SEED
+                |
+                | hydration
+                v
+             IMBIBED
+                |
+                | germination
+                v
+        GERMINATION_ACTIVE
+                |
+                | embryo expansion
+                v
+          COAT_SPLIT
+                |
+                | radicle emergence
+                v
+             RADICLE
+                |
+                | establishment
+                v
+             MODULE_1
+                |
+                |
+        MODULAR GROWTH ENGINE
+                |
+         +------+------+
+         |             |
+         v             v
+      MODULE_2      MODULE_3
+         |             |
+       +-+-+         +-+-+
+       |   |         |   |
+       M4  M5        M6  M7
+         \             /
+          \           /
+           v         v
+        MODULAR POPULATION
+
+
+============================================================
+8. REPRODUCTIVE STATE MUST REMAIN SEPARATE
+============================================================
+
+A module is not automatically a seed.
+
+A useful reproductive-state representation is:
+
+
+class ReproductiveState:
+
+    VEGETATIVE = "vegetative"
+
+    FEMALE = "female"
+
+    MALE = "male"
+
+    INTERSEX = "intersex"
+
+
+Do NOT implement sex determination like this:
+
+if nitrate > X:
+    sex = "intersex"
+
+
+That would imply nitrate concentration reliably determines
+sexual phenotype, which this mathematical growth model
+does not establish.
+
+
+Instead:
+
+                  VEGETATIVE MODULE
+                         |
+                         |
+              reproductive development
+                         |
+                  +------+------+
+                  |      |      |
+                  v      v      v
+                MALE   FEMALE  INTERSEX
+                  |      |       |
+                  +------+-------+
+                         |
+                  reproductive events
+                         |
+                         v
+                        SEED
+
+
+============================================================
+9. OPTIONAL REPRODUCTIVE MODULE
+============================================================
+
+Actual seed production can be represented separately:
+
+
+def reproductive_seed_model(
+    reproductive_sites,
+    pollination_probability,
+    fertilization_probability,
+    maturation_probability
+):
+
+    p_seed = clamp01(
+
+        pollination_probability
+
+        * fertilization_probability
+
+        * maturation_probability
+    )
+
+
+    expected_seed_output = (
+        reproductive_sites
+        * p_seed
+    )
+
+
+    return {
+
+        "mature_seed_probability":
+            p_seed,
+
+        "expected_seed_output":
+            expected_seed_output
+    }
+
+
+This represents:
+
+REPRODUCTIVE SITE
+       |
+       v
+POLLINATION
+       |
+       v
+FERTILIZATION
+       |
+       v
+EMBRYO DEVELOPMENT
+       |
+       v
+SEED MATURATION
+       |
+       v
+NEW SEED
+
+
+It is deliberately NOT:
+
+VEGETATIVE MODULE
+       |
+       v
+SEED
+
+
+============================================================
+10. "ZERO CIRCLE" STATE REDUCTION
+============================================================
+
+The system can be compressed into four Zero-Circle states.
+
+
+Z0 = SEED
+
+
+Z1 = ACTIVATED EMBRYO
+
+
+Z2 = ESTABLISHED VEGETATIVE MODULE
+
+
+Z3 = RENEWABLE MODULAR POPULATION
+
+
+Therefore:
+
+
+Z0
+ |
+ | germination
+ v
+Z1
+ |
+ | establishment
+ v
+Z2
+ |
+ | bounded modular proliferation
+ v
+Z3
+
+
+Or mathematically:
+
+
+Z0
+   --germination-->
+Z1
+
+Z1
+   --establishment-->
+Z2
+
+Z2
+   --bounded cleaving-->
+Z3
+
+
+IMPORTANT:
+
+After Z2, the word "cleaving" means:
+
+    vegetative module generation
+
+NOT:
+
+    repeated seed-coat splitting
+
+
+============================================================
+11. BOUNDED SLOPE STATES
+============================================================
+
+CAPACITY       MODULAR STATE
+-----------------------------------------------
+
+0-10%          RAPID EXPANSION
+
+10-25%         STRONG EXPANSION
+
+25-50%         PRODUCTIVE EXPANSION
+
+~50%           MAXIMUM ABSOLUTE LOGISTIC
+               GROWTH REGION
+
+50-75%         DECELERATING EXPANSION
+
+75-90%         SATURATION APPROACH
+
+90-99%         STRONGLY BOUNDED
+
+~100%          CARRYING-CAPACITY REGION
+
+
+The central logistic term is:
+
+
+Growth =
+    r
+    * M
+    * (1 - M/K)
+    * Omega
+
+
+When:
+
+M = K/2
+
+
+the component:
+
+M * (1 - M/K)
+
+
+is at its mathematical maximum.
+
+
+============================================================
+12. PRESSURE-CHEM INTERPRETATION
+============================================================
+
+The environmental side controls:
+
+Omega
+
+
+The biological population side controls:
+
+M
+
+
+The carrying capacity controls:
+
+K
+
+
+The intrinsic expansion coefficient controls:
+
+r
+
+
+The complete system is therefore:
+
+
+                 ENVIRONMENT
+                     |
+                     v
+            +----------------+
+            |     OMEGA      |
+            +----------------+
+                     |
+                     v
+SEED -------> MODULE -------> MODULAR POPULATION
+                     |
+                     v
+          M(t+1) =
+              M(t)
+              +
+              r*M(t)
+              *(1-M(t)/K)
+              *Omega
+              -
+              Loss
+
+
+============================================================
+13. NON-FLOWERING "CLEAVING" INTERPRETATION
+============================================================
+
+For the non-flowering stage, interpret cleaving as:
+
+MERISTEM ACTIVITY
+
+        +
+
+NODE PRODUCTION
+
+        +
+
+BRANCH PRODUCTION
+
+        +
+
+VEGETATIVE PROPAGATION
+
+        =
+
+MODULAR EXPANSION
+
+
+Therefore:
+
+NON-FLOWERING PLANT
+
+        ->
+
+VEGETATIVE MODULES
+
+        ->
+
+MORE VEGETATIVE MODULES
+
+
+NOT:
+
+NON-FLOWERING PLANT
+
+        ->
+
+SEEDS
+
+
+True seeds remain downstream of reproductive development.
+
+
+============================================================
+14. FINAL INTEGRATED MODEL
+============================================================
+
+
+                  +----------------+
+                  |      SEED      |
+                  +----------------+
+                           |
+                           | germination
+                           v
+                  +----------------+
+                  | ACTIVATED      |
+                  | EMBRYO         |
+                  +----------------+
+                           |
+                           | coat opening
+                           v
+                  +----------------+
+                  | COAT SPLIT     |
+                  +----------------+
+                           |
+                           | radicle
+                           v
+                  +----------------+
+                  | SEEDLING       |
+                  +----------------+
+                           |
+                           | establishment
+                           v
+                  +----------------+
+                  | MODULE M1      |
+                  +----------------+
+                           |
+                           |
+                           v
+              +--------------------------+
+              | BOUNDED MODULAR ENGINE   |
+              |                          |
+              | M(t+1) =                 |
+              | M(t)                     |
+              | + r*M(t)*(1-M(t)/K)      |
+              | * Omega                   |
+              | - losses                  |
+              +--------------------------+
+                           |
+                  +--------+--------+
+                  |                 |
+                  v                 v
+             MODULE M2          MODULE M3
+                  |                 |
+                  +--------+--------+
+                           |
+                           v
+                 VEGETATIVE MODULE
+                      POPULATION
+                           |
+                           |
+                 reproductive
+                   development
+                           |
+                +----------+----------+
+                |          |          |
+                v          v          v
+              MALE       FEMALE    INTERSEX
+                \          |          /
+                 \         |         /
+                  +--------+--------+
+                           |
+                           v
+                REPRODUCTIVE EVENTS
+                           |
+                           v
+                    FERTILIZATION
+                           |
+                           v
+                  EMBRYO DEVELOPMENT
+                           |
+                           v
+                    MATURE SEED
+                           |
+                           +------------------>
+                           |
+                           v
+                          Z0
+
+
+============================================================
+15. CORE RULES
+============================================================
+
+RULE 1
+
+A seed germinates once.
+
+
+RULE 2
+
+Seed-coat splitting is a germination event,
+not reproductive multiplication.
+
+
+RULE 3
+
+After establishment, repeated "splitting" is represented
+as vegetative modular growth.
+
+
+RULE 4
+
+Modular growth is bounded by carrying capacity.
+
+
+RULE 5
+
+Environmental quality multiplies modular growth through Omega.
+
+
+RULE 6
+
+Nitrate has a bounded response rather than providing
+unlimited growth.
+
+
+RULE 7
+
+Nitrate is NOT used as a male/female/intersex switch.
+
+
+RULE 8
+
+Hermaphroditic/intersex reproductive expression remains
+separate from germination.
+
+
+RULE 9
+
+Vegetative modules are NOT called seeds.
+
+
+RULE 10
+
+A new true seed enters the system only through the
+reproductive pathway.
+
+
+============================================================
+16. MASTER EQUATIONS
+============================================================
+
+
+ENVIRONMENT:
+
+Omega =
+    f(N)
+    * f(S)
+    * f(T)
+    * f(aw)
+
+
+BOUNDED MODULAR GROWTH:
+
+M(t+1) =
+    M(t)
+    +
+    r * M(t)
+    * (1 - M(t)/K)
+    * Omega
+    -
+    L(t)
+
+
+SEED ENTRY:
+
+Seed
+    ->
+Germination
+    ->
+Coat Split
+    ->
+Radicle
+    ->
+Module
+
+
+VEGETATIVE LOOP:
+
+Module
+    ->
+Bounded Modular Growth
+    ->
+Additional Modules
+    ->
+Bounded Modular Growth
+    ->
+Additional Modules
+
+
+REPRODUCTIVE LOOP:
+
+Module
+    ->
+Reproductive Development
+    ->
+Pollination/Fertilization
+    ->
+Embryo
+    ->
+Mature Seed
+    ->
+Germination
+    ->
+Module
+
+
+============================================================
+END OF BOUNDED MODULAR-GROWTH MODEL
+============================================================
